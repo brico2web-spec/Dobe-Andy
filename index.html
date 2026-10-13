@@ -1,0 +1,977 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Restaurant Dobe & Andy - Modern Dining Experience</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              silver: '#e2e8f0',       /* رمادي فضي فاتح للعناوين والأزرار */
+              silverHover: '#cbd5e1',  /* درجة الرمادي عند التمرير */
+              darkBg: '#0f172a',       /* خلفية رمادية داكنة جداً راقية */
+              cardDark: '#1e293b',     /* رمادي Slate للبطاقات */
+              borderDark: '#334155',   /* حواف رمادية خفيفة */
+              accent: '#94a3b8'        /* رمادي متدرج للتفاصيل */
+            }
+          },
+          fontFamily: {
+            title: ['Cinzel', 'serif'],
+            body: ['Plus Jakarta Sans', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      background-color: #0f172a;
+      color: #f1f5f9;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      overflow-x: hidden;
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0f172a;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #334155;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+
+    /* Slider Animation */
+    .slider-container {
+      display: flex;
+      width: 300%;
+      animation: slide 15s infinite ease-in-out;
+    }
+
+    @keyframes slide {
+      0%, 28% { transform: translateX(0%); }
+      33%, 61% { transform: translateX(-33.333%); }
+      66%, 95% { transform: translateX(-66.666%); }
+      100% { transform: translateX(0%); }
+    }
+
+    /* Silver Text Gradient */
+    .silver-gradient-text {
+      background: linear-gradient(135deg, #ffffff 0%, #cbd5e1 50%, #64748b 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    /* Modals Fix */
+    #cart-modal, #admin-login-modal, #admin-dashboard-modal {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transition: all 0.3s ease-in-out;
+    }
+
+    #cart-modal.active, #admin-login-modal.active, #admin-dashboard-modal.active {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+    }
+  </style>
+</head>
+<body class="antialiased selection:bg-slate-200 selection:text-slate-900">
+
+  <!-- Navigation Header -->
+  <header class="sticky top-0 z-40 backdrop-blur-md bg-brand-darkBg/90 border-b border-brand-borderDark/60 transition-all">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between">
+      
+      <!-- Brand Logo -->
+      <a href="#" class="flex flex-col items-start group">
+        <span class="text-[10px] sm:text-xs uppercase tracking-[0.25em] font-title text-brand-silver font-bold">Restaurant</span>
+        <span class="text-lg sm:text-2xl font-extrabold font-title tracking-wider text-white group-hover:text-slate-300 transition">Dobe & Andy</span>
+      </a>
+
+      <!-- Desktop Navigation Links -->
+      <nav class="hidden md:flex items-center space-x-6 lg:space-x-8 text-xs lg:text-sm font-medium">
+        <a href="#hero" class="text-slate-300 hover:text-white transition">Home</a>
+        <a href="#menu" class="text-slate-300 hover:text-white transition">Menu & Products</a>
+        <a href="#amenities" class="text-slate-300 hover:text-white transition">Services & Features</a>
+        <a href="#reservation" class="text-slate-300 hover:text-white transition">Reservation</a>
+      </nav>
+
+      <!-- Modern Cart Button & Reservation Action -->
+      <div class="flex items-center space-x-3 sm:space-x-4">
+        <button id="cart-toggle-btn" onclick="toggleCart()" class="relative p-2 sm:p-2.5 text-slate-200 hover:text-white bg-brand-cardDark border border-brand-borderDark rounded-full transition focus:outline-none shadow-sm">
+          <i class="fa-solid fa-basket-shopping text-sm sm:text-base"></i>
+          <span id="cart-badge" class="absolute -top-1 -right-1 bg-slate-100 text-slate-900 font-bold text-[10px] w-4 h-4 sm:w-5 sm:h-5 rounded-full flex items-center justify-center hidden">0</span>
+        </button>
+
+        <a href="#reservation" class="inline-flex items-center justify-center px-3.5 py-2 sm:px-5 sm:py-2.5 text-[11px] sm:text-xs font-bold uppercase tracking-wider text-slate-900 bg-brand-silver hover:bg-white rounded-lg transition shadow-md">
+          Book Table
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section with Automatic Image Slider (No Arrows) -->
+  <section id="hero" class="relative overflow-hidden bg-slate-950 py-10 sm:py-16 lg:py-20 border-b border-brand-borderDark">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+        
+        <!-- Hero Text Content -->
+        <div class="lg:col-span-6 space-y-4 sm:space-y-6 text-center lg:text-left z-10">
+          <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700 text-slate-300 text-[11px] sm:text-xs uppercase tracking-widest font-semibold">
+            <i class="fa-solid fa-star text-[10px] text-slate-400"></i>
+            <span>Exquisite Culinary Experience</span>
+          </div>
+          
+          <h1 class="text-3xl sm:text-5xl lg:text-6xl font-extrabold font-title text-white leading-tight">
+            Taste The Art Of <br class="hidden sm:inline">
+            <span class="silver-gradient-text">Modern Fine Dining</span>
+          </h1>
+
+          <p class="text-slate-400 text-sm sm:text-base lg:text-lg max-w-xl mx-auto lg:mx-0 leading-relaxed">
+            Welcome to Restaurant Dobe & Andy. Enjoy culinary mastery served in an elegant, contemporary atmosphere designed for every occasion.
+          </p>
+
+          <div class="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3 sm:gap-4 pt-2">
+            <a href="#menu" class="w-full sm:w-auto px-7 py-3 text-xs font-bold uppercase tracking-wider text-slate-900 bg-brand-silver hover:bg-white rounded-lg transition text-center shadow-md">
+              Explore Menu
+            </a>
+            <a href="#reservation" class="w-full sm:w-auto px-7 py-3 text-xs font-bold uppercase tracking-wider text-slate-200 border border-brand-borderDark hover:border-slate-400 bg-brand-cardDark rounded-lg transition text-center">
+              Reserve Table
+            </a>
+          </div>
+        </div>
+
+        <!-- Automatic Image Slider Container -->
+        <div class="lg:col-span-6">
+          <div class="relative w-full rounded-2xl overflow-hidden border border-brand-borderDark shadow-2xl">
+            <!-- Slider Track -->
+            <div id="slider-track" class="slider-container">
+              <!-- Dynamic Slider Slides -->
+            </div>
+
+            <!-- Indicator Badge -->
+            <div class="absolute top-3 right-3 sm:top-4 sm:right-4 bg-slate-900/80 backdrop-blur-md px-2.5 py-1 rounded-full border border-slate-700 text-[10px] sm:text-xs text-slate-300 flex items-center space-x-1.5">
+              <span class="w-2 h-2 rounded-full bg-slate-300 animate-pulse"></span>
+              <span>Live View</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- Products & Menu Section -->
+  <section id="menu" class="py-12 sm:py-20 bg-brand-darkBg">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <div class="text-center max-w-2xl mx-auto mb-8 sm:mb-12">
+        <h2 class="text-[11px] sm:text-xs uppercase tracking-[0.25em] font-bold text-slate-400 mb-1.5">Our Culinary Selection</h2>
+        <p class="text-2xl sm:text-4xl font-extrabold font-title text-white">Featured Menu & Dishes</p>
+        <div class="w-12 h-1 bg-slate-500 mx-auto mt-3 rounded-full"></div>
+      </div>
+
+      <!-- Categories Filter Dynamic -->
+      <div id="categories-filter-container" class="flex flex-wrap items-center justify-center gap-2 sm:gap-3 mb-8 sm:mb-12">
+        <!-- Dynamic Categories -->
+      </div>
+
+      <!-- Products Grid -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8" id="menu-grid">
+        <!-- Dynamic Products -->
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Detailed Services & Amenities Section -->
+  <section id="amenities" class="py-12 sm:py-20 bg-slate-950 border-t border-brand-borderDark">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <div class="text-center max-w-2xl mx-auto mb-10 sm:mb-16">
+        <h2 class="text-[11px] sm:text-xs uppercase tracking-[0.25em] font-bold text-slate-400 mb-1.5">Hospitality & Facilities</h2>
+        <p class="text-2xl sm:text-4xl font-extrabold font-title text-white">Services & Features</p>
+        <div class="w-12 h-1 bg-slate-500 mx-auto mt-3 rounded-full"></div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        
+        <!-- Dining Services -->
+        <div class="bg-brand-cardDark border border-brand-borderDark rounded-xl p-5 sm:p-6">
+          <div class="w-10 h-10 bg-slate-800 border border-slate-700 rounded-lg flex items-center justify-center text-slate-200 text-lg mb-4">
+            <i class="fa-solid fa-utensils"></i>
+          </div>
+          <h3 class="text-base font-bold font-title text-white mb-3">Dining Services</h3>
+          <ul class="space-y-2 text-xs sm:text-sm text-slate-300">
+            <li class="flex items-center space-x-2"><i class="fa-solid fa-check text-slate-400 text-[10px]"></i><span>Breakfast & Lunch</span></li>
+            <li class="flex items-center space-x-2"><i class="fa-solid fa-check text-slate-400 text-[10px]"></i><span>Dinner & Solo Dining</span></li>
+            <li class="flex items-center space-x-2"><i class="fa-solid fa-check text-slate-400 text-[10px]"></i><span>Catering Services</span></li>
+            <li class="flex items-center space-x-2"><i class="fa-solid fa-check text-slate-400 text-[10px]"></i><span>Counter & Table Service</span></li>
+            <li class="flex items-center space-x-2"><i class="fa-solid fa-check text-slate-400 text-[10px]"></i><span>Desserts & Coffee</span></li>
+          </ul>
+        </div>
+
+        <!-- Service Modes -->
+        <div class="bg-brand-cardDark border border-brand-borderDark rounded-xl p-5 sm:p-6">
+          <div class="w-10 h-10 bg-slate-800 border border-slate-700 rounded-lg flex items-center justify-center text-slate-200 text-lg mb-4">
+            <i class="fa-solid fa-truck-fast"></i>
+          </div>
+          <h3 class="text-base font-bold font-title text-white mb-3">Available Modes</h3>
+          <ul class="space-y-2 text-xs sm:text-sm text-slate-300">
+            <li class="flex items-center space-x-2"><i class="fa-solid fa-check text-slate-400 text-[10px]"></i><span>Dine-in Experience</span></li>
+            <li class="flex items-center space-x-2"><i class="fa-solid fa-check text-slate-400 text-[10px]"></i><span>Takeaway / To-Go</span></li>
+            <li class="flex items-center space-x-2"><i class="fa-solid fa-check text-slate-400 text-[10px]"></i><span>Home Delivery</span></li>
+            <li class="flex items-center space-x-2"><i class="fa-solid fa-check text-slate-400 text-[10px]"></i><span>Quick Bites / Snacks</span></li>
+            <li class="flex items-center space-x-2"><i class="fa-solid fa-check text-slate-400 text-[10px]"></i><span>Reservations Accepted</span></li>
+          </ul>
+        </div>
+
+        <!-- Accessibility -->
+        <div class="bg-brand-cardDark border border-brand-borderDark rounded-xl p-5 sm:p-6">
+          <div class="w-10 h-10 bg-slate-800 border border-slate-700 rounded-lg flex items-center justify-center text-slate-200 text-lg mb-4">
+            <i class="fa-solid fa-wheelchair"></i>
+          </div>
+          <h3 class="text-base font-bold font-title text-white mb-3">Accessibility & Facilities</h3>
+          <ul class="space-y-2 text-xs sm:text-sm text-slate-300">
+            <li class="flex items-center space-x-2"><i class="fa-solid fa-check text-slate-400 text-[10px]"></i><span>Accessible Entrance</span></li>
+            <li class="flex items-center space-x-2"><i class="fa-solid fa-check text-slate-400 text-[10px]"></i><span>Accessible Seating</span></li>
+            <li class="flex items-center space-x-2"><i class="fa-solid fa-check text-slate-400 text-[10px]"></i><span>Accessible Restrooms</span></li>
+            <li class="flex items-center space-x-2"><i class="fa-solid fa-check text-slate-400 text-[10px]"></i><span>Clean Restrooms</span></li>
+            <li class="flex items-center space-x-2"><i class="fa-solid fa-check text-slate-400 text-[10px]"></i><span>Vegetarian Friendly</span></li>
+          </ul>
+        </div>
+
+        <!-- Payments & Parking -->
+        <div class="bg-brand-cardDark border border-brand-borderDark rounded-xl p-5 sm:p-6">
+          <div class="w-10 h-10 bg-slate-800 border border-slate-700 rounded-lg flex items-center justify-center text-slate-200 text-lg mb-4">
+            <i class="fa-solid fa-credit-card"></i>
+          </div>
+          <h3 class="text-base font-bold font-title text-white mb-3">Payment & Parking</h3>
+          <ul class="space-y-2 text-xs sm:text-sm text-slate-300">
+            <li class="flex items-center space-x-2"><i class="fa-solid fa-check text-slate-400 text-[10px]"></i><span>Credit & Debit Cards</span></li>
+            <li class="flex items-center space-x-2"><i class="fa-solid fa-check text-slate-400 text-[10px]"></i><span>NFC Mobile Payments</span></li>
+            <li class="flex items-center space-x-2"><i class="fa-solid fa-check text-slate-400 text-[10px]"></i><span>Paid Parking Lot</span></li>
+            <li class="flex items-center space-x-2"><i class="fa-solid fa-check text-slate-400 text-[10px]"></i><span>Paid Street Parking</span></li>
+            <li class="flex items-center space-x-2"><i class="fa-solid fa-check text-slate-400 text-[10px]"></i><span>Beer & Drinks Served</span></li>
+          </ul>
+        </div>
+
+      </div>
+
+      <!-- Ultra-Modern Redesigned Atmosphere & Great For Section -->
+      <div class="mt-8 sm:mt-12 grid grid-cols-1 md:grid-cols-2 gap-6">
+        
+        <!-- Atmosphere Card -->
+        <div class="bg-brand-cardDark/80 backdrop-blur-md border border-brand-borderDark rounded-2xl p-6 flex flex-col justify-between hover:border-slate-500/50 transition">
+          <div class="flex items-center space-x-3 mb-4">
+            <div class="w-8 h-8 rounded-lg bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-300 text-sm">
+              <i class="fa-solid fa-couch"></i>
+            </div>
+            <h3 class="text-xs font-bold font-title uppercase tracking-[0.2em] text-slate-300">Atmosphere</h3>
+          </div>
+          <div class="flex flex-wrap gap-2.5">
+            <span class="inline-flex items-center space-x-2 bg-slate-900/90 border border-slate-700/80 px-4 py-2 rounded-xl text-xs text-slate-200 font-medium hover:border-slate-400 transition">
+              <i class="fa-solid fa-mug-hot text-slate-400 text-[10px]"></i>
+              <span>Relaxed Ambiance</span>
+            </span>
+            <span class="inline-flex items-center space-x-2 bg-slate-900/90 border border-slate-700/80 px-4 py-2 rounded-xl text-xs text-slate-200 font-medium hover:border-slate-400 transition">
+              <i class="fa-solid fa-leaf text-slate-400 text-[10px]"></i>
+              <span>Pleasant Setting</span>
+            </span>
+          </div>
+        </div>
+
+        <!-- Great For Card -->
+        <div class="bg-brand-cardDark/80 backdrop-blur-md border border-brand-borderDark rounded-2xl p-6 flex flex-col justify-between hover:border-slate-500/50 transition">
+          <div class="flex items-center space-x-3 mb-4">
+            <div class="w-8 h-8 rounded-lg bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-300 text-sm">
+              <i class="fa-solid fa-users"></i>
+            </div>
+            <h3 class="text-xs font-bold font-title uppercase tracking-[0.2em] text-slate-300">Great For</h3>
+          </div>
+          <div class="flex flex-wrap gap-2.5">
+            <span class="inline-flex items-center space-x-2 bg-slate-900/90 border border-slate-700/80 px-3.5 py-2 rounded-xl text-xs text-slate-200 font-medium hover:border-slate-400 transition">
+              <i class="fa-solid fa-people-roof text-slate-400 text-[10px]"></i>
+              <span>Families</span>
+            </span>
+            <span class="inline-flex items-center space-x-2 bg-slate-900/90 border border-slate-700/80 px-3.5 py-2 rounded-xl text-xs text-slate-200 font-medium hover:border-slate-400 transition">
+              <i class="fa-solid fa-graduation-cap text-slate-400 text-[10px]"></i>
+              <span>Students</span>
+            </span>
+            <span class="inline-flex items-center space-x-2 bg-slate-900/90 border border-slate-700/80 px-3.5 py-2 rounded-xl text-xs text-slate-200 font-medium hover:border-slate-400 transition">
+              <i class="fa-solid fa-user-group text-slate-400 text-[10px]"></i>
+              <span>Groups</span>
+            </span>
+            <span class="inline-flex items-center space-x-2 bg-slate-900/90 border border-slate-700/80 px-3.5 py-2 rounded-xl text-xs text-slate-200 font-medium hover:border-slate-400 transition">
+              <i class="fa-solid fa-plane text-slate-400 text-[10px]"></i>
+              <span>Tourists</span>
+            </span>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Reservation Section -->
+  <section id="reservation" class="py-12 sm:py-20 bg-brand-darkBg">
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="bg-brand-cardDark border border-brand-borderDark rounded-2xl p-6 sm:p-10 shadow-xl">
+        
+        <div class="text-center mb-6 sm:mb-8">
+          <h2 class="text-[11px] sm:text-xs uppercase tracking-[0.25em] font-bold text-slate-400 mb-1">Book Your Table</h2>
+          <p class="text-2xl sm:text-3xl font-extrabold font-title text-white">Table Reservation</p>
+        </div>
+
+        <form onsubmit="handleReservation(event)" class="space-y-4 sm:space-y-5">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-[11px] font-bold uppercase text-slate-400 mb-1.5">Full Name</label>
+              <input type="text" required placeholder="John Doe" class="w-full bg-slate-950 border border-brand-borderDark rounded-lg px-3.5 py-2.5 text-xs sm:text-sm text-white focus:border-slate-400 focus:outline-none">
+            </div>
+            <div>
+              <label class="block text-[11px] font-bold uppercase text-slate-400 mb-1.5">Phone Number</label>
+              <input type="tel" required placeholder="+1 234 567 890" class="w-full bg-slate-950 border border-brand-borderDark rounded-lg px-3.5 py-2.5 text-xs sm:text-sm text-white focus:border-slate-400 focus:outline-none">
+            </div>
+            <div>
+              <label class="block text-[11px] font-bold uppercase text-slate-400 mb-1.5">Date</label>
+              <input type="date" required class="w-full bg-slate-950 border border-brand-borderDark rounded-lg px-3.5 py-2.5 text-xs sm:text-sm text-white focus:border-slate-400 focus:outline-none">
+            </div>
+            <div>
+              <label class="block text-[11px] font-bold uppercase text-slate-400 mb-1.5">Guests</label>
+              <select class="w-full bg-slate-950 border border-brand-borderDark rounded-lg px-3.5 py-2.5 text-xs sm:text-sm text-white focus:border-slate-400 focus:outline-none">
+                <option>2 People</option>
+                <option>4 People</option>
+                <option>6 People</option>
+                <option>Large Group (8+)</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-[11px] font-bold uppercase text-slate-400 mb-1.5">Special Requests</label>
+            <textarea rows="3" placeholder="Anniversary, dietary preferences..." class="w-full bg-slate-950 border border-brand-borderDark rounded-lg px-3.5 py-2.5 text-xs sm:text-sm text-white focus:border-slate-400 focus:outline-none"></textarea>
+          </div>
+
+          <button type="submit" class="w-full py-3.5 text-xs font-bold uppercase tracking-wider text-slate-900 bg-brand-silver hover:bg-white rounded-lg transition shadow-md">
+            Confirm Reservation
+          </button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="bg-slate-950 border-t border-brand-borderDark py-10 text-xs sm:text-sm text-slate-400">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 mb-8">
+        <div>
+          <a href="#" class="inline-block mb-2">
+            <span class="text-[10px] uppercase tracking-[0.25em] font-title text-slate-400 font-bold block">Restaurant</span>
+            <span class="text-lg font-extrabold font-title text-white">Dobe & Andy</span>
+          </a>
+          <p id="footer-about" class="text-xs text-slate-400 leading-relaxed">Delivering culinary perfection with authentic recipes, warm ambiance, and exceptional service.</p>
+        </div>
+
+        <div>
+          <h4 class="text-white font-title font-bold mb-2 text-xs uppercase tracking-wider">Opening Hours</h4>
+          <p id="footer-hours-1" class="text-xs text-slate-400">Monday - Sunday: 08:00 AM - 11:30 PM</p>
+          <p id="footer-hours-2" class="text-xs text-slate-400 mt-1">Kitchen Closes: 10:45 PM</p>
+        </div>
+
+        <div>
+          <h4 class="text-white font-title font-bold mb-2 text-xs uppercase tracking-wider">Contact & Location</h4>
+          <p id="footer-address" class="text-xs text-slate-400"><i class="fa-solid fa-location-dot text-slate-400 mr-1.5"></i>Main Boulevard, City Center</p>
+          <p id="footer-phone" class="text-xs text-slate-400 mt-1"><i class="fa-solid fa-phone text-slate-400 mr-1.5"></i>+1 (555) 019-2834</p>
+        </div>
+      </div>
+
+      <div class="pt-6 border-t border-brand-borderDark flex flex-col sm:flex-row items-center justify-between text-xs text-slate-400 gap-3">
+        <div>&copy; 2026 Restaurant Dobe & Andy. All rights reserved.</div>
+        <div class="flex items-center space-x-3">
+          <span>By Proo OF Concept</span>
+          <span class="text-slate-600">|</span>
+          <a href="#" onclick="openAdminModal(event)" class="text-slate-200 hover:text-white font-bold underline transition flex items-center space-x-1">
+            <i class="fa-solid fa-lock text-[10px] mr-1"></i>
+            <span>Administration</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- CART MODAL OVERLAY -->
+  <div id="cart-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm">
+    <div id="cart-content" class="bg-brand-cardDark border border-brand-borderDark rounded-2xl w-full max-w-sm sm:max-w-md p-5 sm:p-6 shadow-2xl relative">
+      
+      <!-- Close Button -->
+      <button onclick="toggleCart()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-base w-7 h-7 rounded-full flex items-center justify-center bg-slate-900 transition">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+
+      <!-- Modal Header -->
+      <div class="flex items-center space-x-3 mb-4 border-b border-brand-borderDark pb-3">
+        <div class="w-9 h-9 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-200">
+          <i class="fa-solid fa-basket-shopping text-sm"></i>
+        </div>
+        <div>
+          <h3 class="text-base sm:text-lg font-bold font-title text-white">Selected Items</h3>
+          <p class="text-[11px] text-slate-400">Review your order list</p>
+        </div>
+      </div>
+
+      <!-- Items List Container -->
+      <div id="cart-items-container" class="space-y-3 max-h-56 overflow-y-auto my-3 pr-1">
+        <!-- Dynamic Content -->
+      </div>
+
+      <!-- Total & Action -->
+      <div class="border-t border-brand-borderDark pt-4 mt-3">
+        <div class="flex justify-between items-center mb-4">
+          <span class="text-xs sm:text-sm font-bold text-slate-300">Total Amount:</span>
+          <span id="cart-total" class="text-lg sm:text-xl font-bold font-title text-white">$0.00</span>
+        </div>
+
+        <button onclick="checkoutOrder()" class="w-full py-3 text-xs font-bold uppercase tracking-wider text-slate-900 bg-brand-silver hover:bg-white rounded-lg transition shadow-md">
+          Send Order To Kitchen
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- CUSTOM STYLISH ADMIN LOGIN MODAL -->
+  <div id="admin-login-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/90 backdrop-blur-md">
+    <div class="bg-brand-cardDark border border-brand-borderDark rounded-2xl w-full max-w-sm p-6 shadow-2xl relative">
+      <button onclick="closeAdminLogin()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-base w-7 h-7 rounded-full flex items-center justify-center bg-slate-900 transition">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+
+      <div class="text-center mb-6">
+        <div class="w-12 h-12 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-200 mx-auto mb-3">
+          <i class="fa-solid fa-lock text-base"></i>
+        </div>
+        <h3 class="text-lg font-bold font-title text-white">Admin Authentication</h3>
+        <p class="text-xs text-slate-400 mt-1">Enter your credentials to access dashboard</p>
+      </div>
+
+      <form onsubmit="handleAdminLogin(event)" class="space-y-4">
+        <div>
+          <label class="block text-[11px] font-bold uppercase text-slate-400 mb-1">Username</label>
+          <input type="text" id="admin-user-input" required placeholder="admin" class="w-full bg-slate-950 border border-brand-borderDark rounded-lg px-3.5 py-2.5 text-xs text-white focus:border-slate-400 focus:outline-none">
+        </div>
+        <div>
+          <label class="block text-[11px] font-bold uppercase text-slate-400 mb-1">Password</label>
+          <input type="password" id="admin-pass-input" required placeholder="••••••••" class="w-full bg-slate-950 border border-brand-borderDark rounded-lg px-3.5 py-2.5 text-xs text-white focus:border-slate-400 focus:outline-none">
+        </div>
+        <button type="submit" class="w-full py-3 text-xs font-bold uppercase tracking-wider text-slate-900 bg-brand-silver hover:bg-white rounded-lg transition shadow-md">
+          Login
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ADMINISTRATION DASHBOARD MODAL -->
+  <div id="admin-dashboard-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/90 backdrop-blur-md">
+    <div class="bg-brand-cardDark border border-brand-borderDark rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto p-6 shadow-2xl relative">
+      
+      <button onclick="closeAdminDashboard()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-base w-8 h-8 rounded-full flex items-center justify-center bg-slate-900 transition">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+
+      <div class="flex items-center space-x-3 mb-6 border-b border-brand-borderDark pb-4">
+        <div class="w-10 h-10 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-200">
+          <i class="fa-solid fa-gear text-base"></i>
+        </div>
+        <div>
+          <h2 class="text-lg font-bold font-title text-white">Administration Dashboard</h2>
+          <p class="text-xs text-slate-400">Manage slider images, categories, products, and footer details</p>
+        </div>
+      </div>
+
+      <!-- Tabs Navigation -->
+      <div class="flex flex-wrap gap-2 mb-6 border-b border-brand-borderDark pb-3">
+        <button onclick="switchAdminTab('sliders')" id="tab-btn-sliders" class="px-4 py-2 text-xs font-bold uppercase rounded-lg bg-slate-200 text-slate-900 transition">Sliders</button>
+        <button onclick="switchAdminTab('categories')" id="tab-btn-categories" class="px-4 py-2 text-xs font-bold uppercase rounded-lg bg-slate-900 text-slate-300 border border-brand-borderDark transition">Categories</button>
+        <button onclick="switchAdminTab('products')" id="tab-btn-products" class="px-4 py-2 text-xs font-bold uppercase rounded-lg bg-slate-900 text-slate-300 border border-brand-borderDark transition">Products</button>
+        <button onclick="switchAdminTab('footer')" id="tab-btn-footer" class="px-4 py-2 text-xs font-bold uppercase rounded-lg bg-slate-900 text-slate-300 border border-brand-borderDark transition">Footer Info</button>
+      </div>
+
+      <!-- Tab 1: Sliders Management -->
+      <div id="admin-tab-sliders" class="admin-tab-content space-y-4">
+        <h3 class="text-sm font-bold text-white mb-2">Manage Slider Images</h3>
+        <div id="admin-sliders-list" class="space-y-3"></div>
+        <div class="pt-3 border-t border-brand-borderDark space-y-3">
+          <h4 class="text-xs font-bold text-slate-300">Add New Slide</h4>
+          <input type="text" id="new-slide-title" placeholder="Slide Title" class="w-full bg-slate-950 border border-brand-borderDark rounded-lg px-3 py-2 text-xs text-white">
+          <input type="text" id="new-slide-subtitle" placeholder="Subtitle (e.g. Chef's Special)" class="w-full bg-slate-950 border border-brand-borderDark rounded-lg px-3 py-2 text-xs text-white">
+          <input type="url" id="new-slide-img" placeholder="Image URL (https://...)" class="w-full bg-slate-950 border border-brand-borderDark rounded-lg px-3 py-2 text-xs text-white">
+          <button onclick="addSlide()" class="w-full py-2.5 text-xs font-bold uppercase bg-brand-silver text-slate-900 rounded-lg hover:bg-white transition">Add Slide</button>
+        </div>
+      </div>
+
+      <!-- Tab 2: Categories Management -->
+      <div id="admin-tab-categories" class="admin-tab-content space-y-4 hidden">
+        <h3 class="text-sm font-bold text-white mb-2">Manage Menu Categories</h3>
+        <div id="admin-categories-list" class="space-y-2"></div>
+        <div class="pt-3 border-t border-brand-borderDark space-y-3">
+          <h4 class="text-xs font-bold text-slate-300">Add New Category</h4>
+          <input type="text" id="new-cat-id" placeholder="Category Key (e.g. starters)" class="w-full bg-slate-950 border border-brand-borderDark rounded-lg px-3 py-2 text-xs text-white">
+          <input type="text" id="new-cat-name" placeholder="Category Name (e.g. Starters)" class="w-full bg-slate-950 border border-brand-borderDark rounded-lg px-3 py-2 text-xs text-white">
+          <button onclick="addCategory()" class="w-full py-2.5 text-xs font-bold uppercase bg-brand-silver text-slate-900 rounded-lg hover:bg-white transition">Add Category</button>
+        </div>
+      </div>
+
+      <!-- Tab 3: Products Management -->
+      <div id="admin-tab-products" class="admin-tab-content space-y-4 hidden">
+        <h3 class="text-sm font-bold text-white mb-2">Manage Products & Dishes</h3>
+        <div id="admin-products-list" class="space-y-3 max-h-60 overflow-y-auto pr-1"></div>
+        <div class="pt-3 border-t border-brand-borderDark space-y-3">
+          <h4 class="text-xs font-bold text-slate-300">Add New Product</h4>
+          <input type="text" id="new-prod-title" placeholder="Product Title" class="w-full bg-slate-950 border border-brand-borderDark rounded-lg px-3 py-2 text-xs text-white">
+          <select id="new-prod-category" class="w-full bg-slate-950 border border-brand-borderDark rounded-lg px-3 py-2 text-xs text-white">
+            <!-- Dynamic Category Options -->
+          </select>
+          <input type="number" step="0.01" id="new-prod-price" placeholder="Price ($)" class="w-full bg-slate-950 border border-brand-borderDark rounded-lg px-3 py-2 text-xs text-white">
+          <input type="url" id="new-prod-img" placeholder="Image URL (https://...)" class="w-full bg-slate-950 border border-brand-borderDark rounded-lg px-3 py-2 text-xs text-white">
+          <textarea id="new-prod-desc" placeholder="Product Description" rows="2" class="w-full bg-slate-950 border border-brand-borderDark rounded-lg px-3 py-2 text-xs text-white"></textarea>
+          <button onclick="addProduct()" class="w-full py-2.5 text-xs font-bold uppercase bg-brand-silver text-slate-900 rounded-lg hover:bg-white transition">Add Product</button>
+        </div>
+      </div>
+
+      <!-- Tab 4: Footer Info Management -->
+      <div id="admin-tab-footer" class="admin-tab-content space-y-4 hidden">
+        <h3 class="text-sm font-bold text-white mb-2">Edit Footer Information</h3>
+        <div class="space-y-3">
+          <div>
+            <label class="block text-[11px] font-bold uppercase text-slate-400 mb-1">About Text</label>
+            <textarea id="edit-footer-about" rows="2" class="w-full bg-slate-950 border border-brand-borderDark rounded-lg px-3 py-2 text-xs text-white"></textarea>
+          </div>
+          <div>
+            <label class="block text-[11px] font-bold uppercase text-slate-400 mb-1">Opening Hours Line 1</label>
+            <input type="text" id="edit-footer-h1" class="w-full bg-slate-950 border border-brand-borderDark rounded-lg px-3 py-2 text-xs text-white">
+          </div>
+          <div>
+            <label class="block text-[11px] font-bold uppercase text-slate-400 mb-1">Opening Hours Line 2</label>
+            <input type="text" id="edit-footer-h2" class="w-full bg-slate-950 border border-brand-borderDark rounded-lg px-3 py-2 text-xs text-white">
+          </div>
+          <div>
+            <label class="block text-[11px] font-bold uppercase text-slate-400 mb-1">Address Location</label>
+            <input type="text" id="edit-footer-address" class="w-full bg-slate-950 border border-brand-borderDark rounded-lg px-3 py-2 text-xs text-white">
+          </div>
+          <div>
+            <label class="block text-[11px] font-bold uppercase text-slate-400 mb-1">Phone Number</label>
+            <input type="text" id="edit-footer-phone" class="w-full bg-slate-950 border border-brand-borderDark rounded-lg px-3 py-2 text-xs text-white">
+          </div>
+          <button onclick="saveFooterInfo()" class="w-full py-2.5 text-xs font-bold uppercase bg-brand-silver text-slate-900 rounded-lg hover:bg-white transition">Save Footer Information</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- JavaScript Logic & Dynamic App Engine -->
+  <script>
+    // Initial Database / State
+    let siteData = {
+      sliders: [
+        { title: "Signature Prime Ribeye Steak", subtitle: "Chef's Special", img: "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=1200&q=80" },
+        { title: "Cozy & Elegant Dining Atmosphere", subtitle: "Ambiance", img: "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=1200&q=80" },
+        { title: "Artisanal Fresh Italian Cuisine", subtitle: "Fresh Ingredients", img: "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&w=1200&q=80" }
+      ],
+      categories: [
+        { id: "all", name: "All Items" },
+        { id: "mains", name: "Main Dishes" },
+        { id: "desserts", name: "Desserts" },
+        { id: "drinks", name: "Beverages" }
+      ],
+      products: [
+        { id: 1, title: "Grilled Prime Ribeye", category: "mains", price: 28.50, img: "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=80", desc: "Grass-fed ribeye steak served with garlic herb butter, roasted asparagus, and fries." },
+        { id: 2, title: "Truffle Tagliatelle", category: "mains", price: 22.00, img: "https://images.unsplash.com/photo-1621996346565-e3d5d6281288?auto=format&fit=crop&w=600&q=80", desc: "Handmade pasta tossed in rich black truffle cream sauce with aged Parmesan shavings." },
+        { id: 3, title: "Pan-Seared Atlantic Salmon", category: "mains", price: 24.90, img: "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&w=600&q=80", desc: "Crispy Atlantic salmon served with lemon dill sauce and fresh sautéed vegetables." },
+        { id: 4, title: "Classic Italian Tiramisu", category: "desserts", price: 9.50, img: "https://images.unsplash.com/photo-1571877227200-a0d98ea607e9?auto=format&fit=crop&w=600&q=80", desc: "Traditional ladyfingers soaked in espresso with whipped mascarpone cream." },
+        { id: 5, title: "Warm Chocolate Fondant", category: "desserts", price: 11.00, img: "https://images.unsplash.com/photo-1606313564200-e75d5e30476c?auto=format&fit=crop&w=600&q=80", desc: "Decadent chocolate cake with molten center, served with vanilla ice cream." },
+        { id: 6, title: "Silver Velvet Cocktail", category: "drinks", price: 13.50, img: "https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?auto=format&fit=crop&w=600&q=80", desc: "Premium bourbon, lemon juice, honey syrup, and aromatic herbs." }
+      ],
+      footer: {
+        about: "Delivering culinary perfection with authentic recipes, warm ambiance, and exceptional service.",
+        hours1: "Monday - Sunday: 08:00 AM - 11:30 PM",
+        hours2: "Kitchen Closes: 10:45 PM",
+        address: "Main Boulevard, City Center",
+        phone: "+1 (555) 019-2834"
+      }
+    };
+
+    let cart = [];
+
+    // Render Website Components from State
+    function renderWebsite() {
+      // 1. Sliders
+      const sliderTrack = document.getElementById('slider-track');
+      sliderTrack.innerHTML = siteData.sliders.map(slide => `
+        <div class="w-full flex-shrink-0 relative h-[260px] sm:h-[380px] lg:h-[440px]">
+          <img src="${slide.img}" alt="${slide.title}" class="w-full h-full object-cover">
+          <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-transparent"></div>
+          <div class="absolute bottom-4 left-4 right-4 sm:bottom-6 sm:left-6 sm:right-6 text-white">
+            <span class="text-[10px] sm:text-xs text-slate-400 font-semibold uppercase tracking-wider">${slide.subtitle}</span>
+            <h3 class="text-base sm:text-xl font-bold font-title">${slide.title}</h3>
+          </div>
+        </div>
+      `).join('');
+
+      // 2. Categories Filter
+      const catContainer = document.getElementById('categories-filter-container');
+      catContainer.innerHTML = siteData.categories.map((cat, idx) => `
+        <button onclick="filterMenu('${cat.id}')" class="menu-filter-btn px-4 py-2 text-[11px] sm:text-xs font-bold uppercase rounded-full border ${idx === 0 ? 'border-slate-200 bg-slate-200 text-slate-900' : 'border-brand-borderDark bg-brand-cardDark text-slate-300 hover:border-slate-500'} transition">${cat.name}</button>
+      `).join('');
+
+      // Product Category Dropdown in Admin
+      const prodCatSelect = document.getElementById('new-prod-category');
+      if(prodCatSelect) {
+        prodCatSelect.innerHTML = siteData.categories.filter(c => c.id !== 'all').map(c => `
+          <option value="${c.id}">${c.name}</option>
+        `).join('');
+      }
+
+      // 3. Products Grid
+      const menuGrid = document.getElementById('menu-grid');
+      menuGrid.innerHTML = siteData.products.map(prod => `
+        <div class="menu-card category-${prod.category} bg-brand-cardDark border border-brand-borderDark rounded-2xl overflow-hidden group hover:border-slate-500 transition duration-300 flex flex-col justify-between">
+          <div>
+            <div class="relative h-48 sm:h-56 overflow-hidden">
+              <img src="${prod.img}" alt="${prod.title}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+              <span class="absolute top-3 right-3 bg-slate-900/90 backdrop-blur-md text-white font-bold text-xs px-3 py-1 rounded-full border border-slate-700">$${prod.price.toFixed(2)}</span>
+            </div>
+            <div class="p-5 sm:p-6">
+              <h3 class="text-base sm:text-lg font-bold font-title text-white group-hover:text-slate-300 transition">${prod.title}</h3>
+              <p class="text-slate-400 text-xs sm:text-sm leading-relaxed mt-2">${prod.desc}</p>
+            </div>
+          </div>
+          <div class="px-5 pb-5 sm:px-6 sm:pb-6 pt-0">
+            <button onclick="addToCart('${prod.title.replace(/'/g, "\\'")}', ${prod.price})" class="w-full py-2.5 text-xs font-bold uppercase tracking-wider text-slate-900 bg-brand-silver hover:bg-white rounded-lg transition flex items-center justify-center space-x-2">
+              <i class="fa-solid fa-plus text-[10px]"></i>
+              <span>Add to Order</span>
+            </button>
+          </div>
+        </div>
+      `).join('');
+
+      // 4. Footer Info
+      document.getElementById('footer-about').innerText = siteData.footer.about;
+      document.getElementById('footer-hours-1').innerText = siteData.footer.hours1;
+      document.getElementById('footer-hours-2').innerText = siteData.footer.hours2;
+      document.getElementById('footer-address').innerHTML = `<i class="fa-solid fa-location-dot text-slate-400 mr-1.5"></i>${siteData.footer.address}`;
+      document.getElementById('footer-phone').innerHTML = `<i class="fa-solid fa-phone text-slate-400 mr-1.5"></i>${siteData.footer.phone}`;
+    }
+
+    // Cart Management
+    function toggleCart() {
+      const modal = document.getElementById('cart-modal');
+      modal.classList.toggle('active');
+    }
+
+    document.getElementById('cart-modal').addEventListener('click', function(e) {
+      if (e.target === this) {
+        toggleCart();
+      }
+    });
+
+    function addToCart(title, price) {
+      const existing = cart.find(item => item.title === title);
+      if (existing) {
+        existing.qty += 1;
+      } else {
+        cart.push({ title, price, qty: 1 });
+      }
+      updateCartUI();
+      
+      const modal = document.getElementById('cart-modal');
+      if (!modal.classList.contains('active')) {
+        toggleCart();
+      }
+    }
+
+    function changeQty(index, change) {
+      cart[index].qty += change;
+      if (cart[index].qty <= 0) {
+        cart.splice(index, 1);
+      }
+      updateCartUI();
+    }
+
+    function updateCartUI() {
+      const container = document.getElementById('cart-items-container');
+      const badge = document.getElementById('cart-badge');
+      const totalEl = document.getElementById('cart-total');
+
+      const totalCount = cart.reduce((sum, item) => sum + item.qty, 0);
+      const totalPrice = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+
+      if (totalCount > 0) {
+        badge.innerText = totalCount;
+        badge.classList.remove('hidden');
+      } else {
+        badge.classList.add('hidden');
+      }
+
+      if (cart.length === 0) {
+        container.innerHTML = `
+          <div class="text-center py-6 text-slate-400 text-xs">
+            <i class="fa-solid fa-basket-shopping text-xl mb-2 block text-slate-400"></i>
+            Your cart is empty. Choose delicious meals from our menu!
+          </div>
+        `;
+      } else {
+        container.innerHTML = cart.map((item, index) => `
+          <div class="flex items-center justify-between bg-slate-950 border border-brand-borderDark p-3 rounded-xl">
+            <div>
+              <h4 class="text-xs font-bold text-white">${item.title}</h4>
+              <p class="text-xs text-slate-300 font-semibold">$${(item.price * item.qty).toFixed(2)}</p>
+            </div>
+            <div class="flex items-center space-x-2 bg-brand-cardDark border border-brand-borderDark px-2 py-1 rounded-lg">
+              <button onclick="changeQty(${index}, -1)" class="text-xs text-slate-400 hover:text-white w-4 h-4 flex items-center justify-center">-</button>
+              <span class="text-xs font-bold text-white px-1">${item.qty}</span>
+              <button onclick="changeQty(${index}, 1)" class="text-xs text-slate-400 hover:text-white w-4 h-4 flex items-center justify-center">+</button>
+            </div>
+          </div>
+        `).join('');
+      }
+
+      totalEl.innerText = `$${totalPrice.toFixed(2)}`;
+    }
+
+    function filterMenu(category) {
+      const cards = document.querySelectorAll('.menu-card');
+      const buttons = document.querySelectorAll('.menu-filter-btn');
+
+      buttons.forEach(btn => {
+        btn.classList.remove('bg-slate-200', 'text-slate-900', 'border-slate-200');
+        btn.classList.add('bg-brand-cardDark', 'text-slate-300', 'border-brand-borderDark');
+      });
+
+      event.currentTarget.classList.remove('bg-brand-cardDark', 'text-slate-300', 'border-brand-borderDark');
+      event.currentTarget.classList.add('bg-slate-200', 'text-slate-900', 'border-slate-200');
+
+      cards.forEach(card => {
+        if (category === 'all' || card.classList.contains(`category-${category}`)) {
+          card.style.display = 'flex';
+        } else {
+          card.style.display = 'none';
+        }
+      });
+    }
+
+    function handleReservation(e) {
+      e.preventDefault();
+      alert('Thank you! Your reservation request has been received. We will contact you shortly to confirm.');
+      e.target.reset();
+    }
+
+    function checkoutOrder() {
+      if (cart.length === 0) {
+        alert('Your cart is empty!');
+        return;
+      }
+      alert('Order successfully placed! Our kitchen team is preparing your meals.');
+      cart = [];
+      updateCartUI();
+      toggleCart();
+    }
+
+    // Custom Styled Admin Authentication & Dashboard Control
+    function openAdminModal(e) {
+      e.preventDefault();
+      document.getElementById('admin-login-modal').classList.add('active');
+    }
+
+    function closeAdminLogin() {
+      document.getElementById('admin-login-modal').classList.remove('active');
+    }
+
+    function handleAdminLogin(e) {
+      e.preventDefault();
+      const username = document.getElementById('admin-user-input').value.trim();
+      const password = document.getElementById('admin-pass-input').value.trim();
+
+      if ((username === "admin" || username === "administrator") && (password === "admin123" || password === "admin")) {
+        closeAdminLogin();
+        document.getElementById('admin-user-input').value = '';
+        document.getElementById('admin-pass-input').value = '';
+        populateAdminDashboard();
+        document.getElementById('admin-dashboard-modal').classList.add('active');
+      } else {
+        alert("Invalid username or password! (Try admin / admin123)");
+      }
+    }
+
+    function closeAdminDashboard() {
+      document.getElementById('admin-dashboard-modal').classList.remove('active');
+    }
+
+    function switchAdminTab(tabName) {
+      document.querySelectorAll('.admin-tab-content').forEach(tab => tab.classList.add('hidden'));
+      document.querySelectorAll('[id^="tab-btn-"]').forEach(btn => {
+        btn.classList.remove('bg-slate-200', 'text-slate-900');
+        btn.classList.add('bg-slate-900', 'text-slate-300', 'border', 'border-brand-borderDark');
+      });
+
+      document.getElementById(`admin-tab-${tabName}`).classList.remove('hidden');
+      const activeBtn = document.getElementById(`tab-btn-${tabName}`);
+      activeBtn.classList.remove('bg-slate-900', 'text-slate-300', 'border', 'border-brand-borderDark');
+      activeBtn.classList.add('bg-slate-200', 'text-slate-900');
+    }
+
+    function populateAdminDashboard() {
+      // Sliders List
+      const slidersList = document.getElementById('admin-sliders-list');
+      slidersList.innerHTML = siteData.sliders.map((s, idx) => `
+        <div class="flex items-center justify-between bg-slate-950 p-3 rounded-xl border border-brand-borderDark">
+          <div class="flex items-center space-x-3">
+            <img src="${s.img}" class="w-12 h-12 object-cover rounded-lg">
+            <div>
+              <p class="text-xs font-bold text-white">${s.title}</p>
+              <p class="text-[10px] text-slate-400">${s.subtitle}</p>
+            </div>
+          </div>
+          <button onclick="deleteSlide(${idx})" class="text-xs text-red-400 hover:text-red-300 p-2"><i class="fa-solid fa-trash"></i></button>
+        </div>
+      `).join('');
+
+      // Categories List
+      const catsList = document.getElementById('admin-categories-list');
+      catsList.innerHTML = siteData.categories.filter(c => c.id !== 'all').map((c, idx) => `
+        <div class="flex items-center justify-between bg-slate-950 p-3 rounded-xl border border-brand-borderDark">
+          <span class="text-xs text-white font-bold">${c.name} (${c.id})</span>
+          <button onclick="deleteCategory('${c.id}')" class="text-xs text-red-400 hover:text-red-300 p-2"><i class="fa-solid fa-trash"></i></button>
+        </div>
+      `).join('');
+
+      // Products List
+      const prodsList = document.getElementById('admin-products-list');
+      prodsList.innerHTML = siteData.products.map((p, idx) => `
+        <div class="flex items-center justify-between bg-slate-950 p-3 rounded-xl border border-brand-borderDark">
+          <div class="flex items-center space-x-3">
+            <img src="${p.img}" class="w-10 h-10 object-cover rounded-lg">
+            <div>
+              <p class="text-xs font-bold text-white">${p.title} - <span class="text-brand-silver">$${p.price.toFixed(2)}</span></p>
+              <p class="text-[10px] text-slate-400">Category: ${p.category}</p>
+            </div>
+          </div>
+          <button onclick="deleteProduct(${p.id})" class="text-xs text-red-400 hover:text-red-300 p-2"><i class="fa-solid fa-trash"></i></button>
+        </div>
+      `).join('');
+
+      // Footer Form Fields
+      document.getElementById('edit-footer-about').value = siteData.footer.about;
+      document.getElementById('edit-footer-h1').value = siteData.footer.hours1;
+      document.getElementById('edit-footer-h2').value = siteData.footer.hours2;
+      document.getElementById('edit-footer-address').value = siteData.footer.address;
+      document.getElementById('edit-footer-phone').value = siteData.footer.phone;
+    }
+
+    // Admin Actions
+    function addSlide() {
+      const title = document.getElementById('new-slide-title').value;
+      const subtitle = document.getElementById('new-slide-subtitle').value;
+      const img = document.getElementById('new-slide-img').value;
+      if(!title || !img) { alert('Please fill in title and image URL'); return; }
+      siteData.sliders.push({ title, subtitle, img });
+      document.getElementById('new-slide-title').value = '';
+      document.getElementById('new-slide-subtitle').value = '';
+      document.getElementById('new-slide-img').value = '';
+      renderWebsite();
+      populateAdminDashboard();
+      alert('Slide added successfully!');
+    }
+
+    function deleteSlide(idx) {
+      siteData.sliders.splice(idx, 1);
+      renderWebsite();
+      populateAdminDashboard();
+    }
+
+    function addCategory() {
+      const id = document.getElementById('new-cat-id').value.trim().toLowerCase();
+      const name = document.getElementById('new-cat-name').value.trim();
+      if(!id || !name) { alert('Please fill in both fields'); return; }
+      if(siteData.categories.some(c => c.id === id)) { alert('Category ID already exists'); return; }
+      siteData.categories.push({ id, name });
+      document.getElementById('new-cat-id').value = '';
+      document.getElementById('new-cat-name').value = '';
+      renderWebsite();
+      populateAdminDashboard();
+      alert('Category added successfully!');
+    }
+
+    function deleteCategory(id) {
+      siteData.categories = siteData.categories.filter(c => c.id !== id);
+      siteData.products = siteData.products.filter(p => p.category !== id);
+      renderWebsite();
+      populateAdminDashboard();
+    }
+
+    function addProduct() {
+      const title = document.getElementById('new-prod-title').value;
+      const category = document.getElementById('new-prod-category').value;
+      const price = parseFloat(document.getElementById('new-prod-price').value);
+      const img = document.getElementById('new-prod-img').value;
+      const desc = document.getElementById('new-prod-desc').value;
+
+      if(!title || isNaN(price) || !img) { alert('Please fill in all required product fields'); return; }
+      const newId = siteData.products.length > 0 ? Math.max(...siteData.products.map(p => p.id)) + 1 : 1;
+      siteData.products.push({ id: newId, title, category, price, img, desc });
+
+      document.getElementById('new-prod-title').value = '';
+      document.getElementById('new-prod-price').value = '';
+      document.getElementById('new-prod-img').value = '';
+      document.getElementById('new-prod-desc').value = '';
+
+      renderWebsite();
+      populateAdminDashboard();
+      alert('Product added successfully!');
+    }
+
+    function deleteProduct(id) {
+      siteData.products = siteData.products.filter(p => p.id !== id);
+      renderWebsite();
+      populateAdminDashboard();
+    }
+
+    function saveFooterInfo() {
+      siteData.footer.about = document.getElementById('edit-footer-about').value;
+      siteData.footer.hours1 = document.getElementById('edit-footer-h1').value;
+      siteData.footer.hours2 = document.getElementById('edit-footer-h2').value;
+      siteData.footer.address = document.getElementById('edit-footer-address').value;
+      siteData.footer.phone = document.getElementById('edit-footer-phone').value;
+
+      renderWebsite();
+      alert('Footer information updated successfully!');
+    }
+
+    // Initial load
+    renderWebsite();
+    updateCartUI();
+  </script>
+</body>
+</html>
